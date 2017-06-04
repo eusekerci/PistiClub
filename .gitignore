@@ -1,0 +1,11 @@
+Library/
+Temp/
+Assets/Plugins/UniRx/Examples
+Build/
+.vs/
+Gifs/
+*.csproj
+*.sln
+Assets/Plugins/UniRx/Examples.meta
+StreamingAssets
+/ProjectSettings/ProjectVersion.txt
