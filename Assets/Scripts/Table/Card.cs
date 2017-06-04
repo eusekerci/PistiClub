@@ -6,10 +6,10 @@ namespace PistiClub
 {
     public enum CardShape
     {
-        Diamonds,
-        Clubs,
-        Hearts,
-        Spades
+        Clubs = 0,
+        Diamonds = 1,
+        Hearts = 2,
+        Spades = 3
     }
 
     public enum CardValue
@@ -77,7 +77,7 @@ namespace PistiClub
 
         public static string CreateId(CardShape shape, CardValue value)
         {
-            return shape.ToString() + value.ToString();
+            return  value.ToString() + "Of" + shape.ToString();
         }
     }
 }
