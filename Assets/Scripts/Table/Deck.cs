@@ -4,12 +4,14 @@ using UnityEngine;
 
 namespace PistiClub
 {
+    public class DrawCardEvent : PcEvent { }
+
     public class Deck
     {
         private List<Card> _cardPool;
         private List<Card> _usedCards;
 
-        public Deck(int numberOfDeck)
+        public Deck(int numberOfDeck = 1)
         {
             _cardPool = new List<Card>();
             for (int i = 0; i < numberOfDeck; i++)
@@ -49,6 +51,7 @@ namespace PistiClub
                 {
                     _usedCards.Add(card);
                     _cardPool.Remove(card);
+                    MessageBus.Publish(new DrawCardEvent());
                     return c;
                 }
             }

@@ -4,10 +4,7 @@ using UnityEngine;
 
 namespace PistiClub
 {
-    public abstract class PcEvent
-    {
-
-    }
+    public abstract class PcEvent { }
 
     public static class MessageBus
     {
