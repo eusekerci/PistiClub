@@ -29,6 +29,11 @@ namespace PistiClub
             return CardSprites[(int)shape + (((int)value - 1) * 4)];
         }
 
+        public static Sprite GetCardBackSprite()
+        {
+            return CardSprites[52];
+        }
+
         public static T Load<T>(PcResourceType resType) where T : Object
         {
             if (!ResourcePaths.ContainsKey(resType))

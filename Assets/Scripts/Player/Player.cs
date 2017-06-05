@@ -19,10 +19,11 @@ namespace PistiClub
             ReorderHand();
         }
 
-        protected override void OnPlayCard()
+        protected override void OnPlayCard(Card playedCard)
         {
-            base.OnPlayCard();
-
+            base.OnPlayCard(playedCard);
+            Hand.Remove(playedCard);
+            ReorderHand();
         }
 
         protected override void OnTurnStart()

@@ -25,17 +25,31 @@ namespace PistiClub
             Init();
         }
 
-        public void LoadData(Card data)
+        public void LoadData(Card data, bool isSecret = false)
         {
             Data = data;
             _renderer = GetComponent<SpriteRenderer>();
-            _renderer.sprite = PcResources.GetCardSprite(Data.Shape, Data.Value);
+            if (!isSecret)
+            {
+                _renderer.sprite = PcResources.GetCardSprite(Data.Shape, Data.Value);
+            }
+            else
+            {
+                _renderer.sprite = PcResources.GetCardBackSprite();
+            }
         }
 
-        public void LoadData(CardShape shape, CardValue value)
+        public void LoadData(CardShape shape, CardValue value, bool isSecret = false)
         {
             var data = new Card(shape, value);
-            LoadData(data);
+            LoadData(data, isSecret);
+        }
+
+        public void LoadCardBack()
+        {
+            Data = null;
+            _renderer = GetComponent<SpriteRenderer>();
+            _renderer.sprite = PcResources.GetCardBackSprite();
         }
     }
 

@@ -1,12 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 namespace PistiClub
 {
     public class RoundStartEvent : PcEvent { }
 
-    public class TurnStartEvent : PcEvent { }
+    public class TurnStartEvent : PcEvent
+    {
+        public PlayerBase Player { get; set; }
+    }
 
     public class GameManager : MonoBehaviour
     {
@@ -18,6 +22,8 @@ namespace PistiClub
         private Transform _p2Root;
         [SerializeField]
         private Transform _midRoot;
+        [SerializeField]
+        private Transform _deckRoot;
 
         private Deck _deck;
         private List<ControllerBase> _controllers;
@@ -29,6 +35,7 @@ namespace PistiClub
 
         private int _turnCounter;
         private int _maxTurn;
+        private PlayerBase _yourTurn;
 
         void Start()
         {
@@ -39,11 +46,18 @@ namespace PistiClub
 
             _playerCount = 2;
 
-            _players.Add(new Player(1, _p1Root));
-            _controllers.Add(new PlayerController());
+            _players.Add(new Player(0, _p1Root));
+            _controllers.Add(new PlayerController(_players[0]));
 
-            _players.Add(new Player(2, _p2Root));
-            _controllers.Add(new PlayerController());
+            _players.Add(new Player(1, _p2Root));
+            _controllers.Add(new PlayerController(_players[1]));
+
+            MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
+                if (evnt.Player.PlayerID == _yourTurn.PlayerID)
+                {
+                    OnCardPlayed(evnt.Card);
+                }
+            });
 
             OnGameStart();
         }
@@ -75,11 +89,25 @@ namespace PistiClub
                     GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
                     newCard.GetComponent<CardView>().LoadData(_cardsOnMid[i]);
                     newCard.transform.SetParent(_midRoot);
+                    newCard.transform.localPosition = Vector3.zero;
                 }
             }
+            if (_deck.RemainingCount() > 0 && _deckRoot.childCount < 1)
+            {
+                GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
+                newCard.GetComponent<CardView>().LoadCardBack();
+                newCard.transform.SetParent(_deckRoot);
+                newCard.transform.localPosition = Vector3.zero;
+            }
+            else
+            {
+                GameObject lastCard = _deckRoot.GetChild(0).gameObject;
+                ObjectPool.Instance.PushToPool(ref lastCard);
+            }
+
+            _yourTurn = _players[0];
 
             OnAllHandsAreEmpty();
-            MessageBus.Publish(new RoundStartEvent());
         }
 
         private void OnAllHandsAreEmpty()
@@ -91,6 +119,14 @@ namespace PistiClub
                     _players[j].TakeCard(_deck.Draw());
                 }
             }
+
+            MessageBus.Publish(new RoundStartEvent());
+            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn });
+        }
+
+        protected void OnCardPlayed(Card newCard)
+        {
+            
         }
     }
 }
