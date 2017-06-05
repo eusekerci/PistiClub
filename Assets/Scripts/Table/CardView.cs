@@ -12,14 +12,12 @@ namespace PistiClub
 
         public GameObject Prefab
         {
-            get { return gameObject; }
+            get { return PcResources.Load<GameObject>(PcResourceType.Card); }
             set { }
         }
+
         public void Init()
         {
-            Data = new Card(CardShape.Spades, CardValue.Ace);
-            _renderer = GetComponent<SpriteRenderer>();
-            _renderer.sprite = PcResources.GetCardSprite(Data.Shape, Data.Value);
         }
 
         void Start()

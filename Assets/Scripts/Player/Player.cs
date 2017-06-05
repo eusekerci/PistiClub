@@ -13,16 +13,21 @@ namespace PistiClub
             HandRoot = root;
         }
 
-        protected override void OnTurnStart()
+        protected override void OnRoundStart()
         {
-            base.OnTurnStart();
-
+            base.OnRoundStart();
+            ReorderHand();
         }
 
         protected override void OnPlayCard()
         {
             base.OnPlayCard();
 
+        }
+
+        protected override void OnTurnStart()
+        {
+            base.OnTurnStart();
         }
 
         public override void TakeCard(Card newCard)
@@ -33,7 +38,19 @@ namespace PistiClub
 
         public void ReorderHand()
         {
+            for (int i = 0; i < HandRoot.childCount; i++)
+            {
+                GameObject oldCard = HandRoot.GetChild(0).gameObject;
+                ObjectPool.Instance.PushToPool(ref oldCard);
+            }
 
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                GameObject newCard = ObjectPool.Instance.PopFromPool(PcResources.Load<GameObject>(PcResourceType.Card), false, true);
+                newCard.GetComponent<CardView>().LoadData(Hand[i]);
+                newCard.transform.position = HandRoot.transform.position + new Vector3(i * 2f, 0f, 0f);
+                newCard.transform.SetParent(HandRoot);
+            }
         }
 
         public override void Update()

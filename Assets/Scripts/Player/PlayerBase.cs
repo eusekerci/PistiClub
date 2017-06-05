@@ -13,9 +13,12 @@ namespace PistiClub
 
         protected PlayerBase()
         {
-            MessageBus.OnEvent<TurnStartEvent>().Subscribe(evnt => OnTurnStart());
+            MessageBus.OnEvent<RoundStartEvent>().Subscribe(evnt => OnRoundStart());
+            
             MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => OnPlayCard());
         }
+
+        protected virtual void OnRoundStart() { }
 
         protected virtual void OnTurnStart() { }
 

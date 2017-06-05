@@ -4,16 +4,20 @@ using UnityEngine;
 
 namespace PistiClub
 {
-    public class TurnStartEvent : PcEvent { }
+    public class RoundStartEvent : PcEvent { }
 
-    public class AllHandsEmptyEvent : PcEvent { }
+    public class TurnStartEvent : PcEvent { }
 
     public class GameManager : MonoBehaviour
     {
+        public GameObject CardPrefab;
+
         [SerializeField]
         private Transform _p1Root;
         [SerializeField]
         private Transform _p2Root;
+        [SerializeField]
+        private Transform _midRoot;
 
         private Deck _deck;
         private List<ControllerBase> _controllers;
@@ -62,9 +66,20 @@ namespace PistiClub
             for(int i=0; i<4; i++)
             {
                 _cardsOnMid.Add(_deck.Draw());
+                if (_midRoot.childCount > 0)
+                {
+                    _midRoot.GetChild(0).GetComponent<CardView>().LoadData(_cardsOnMid[i]);
+                }
+                else
+                {
+                    GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
+                    newCard.GetComponent<CardView>().LoadData(_cardsOnMid[i]);
+                    newCard.transform.SetParent(_midRoot);
+                }
             }
 
             OnAllHandsAreEmpty();
+            MessageBus.Publish(new RoundStartEvent());
         }
 
         private void OnAllHandsAreEmpty()
