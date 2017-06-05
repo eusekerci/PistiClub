@@ -14,6 +14,8 @@ namespace PistiClub
         public Deck(int numberOfDeck = 1)
         {
             _cardPool = new List<Card>();
+            _usedCards = new List<Card>();
+
             for (int i = 0; i < numberOfDeck; i++)
             {
                 foreach (CardShape shape in System.Enum.GetValues(typeof(CardShape)))
@@ -36,9 +38,8 @@ namespace PistiClub
         public Card Draw()
         {
             int r = Random.Range(0, RemainingCount());
-            Card c = _cardPool[r];
 
-            return Draw(c.Shape, c.Value);
+            return Draw(_cardPool[r].Shape, _cardPool[r].Value);
         }
 
         public Card Draw(CardShape shape, CardValue value)
@@ -47,7 +48,7 @@ namespace PistiClub
 
             foreach (Card card in _cardPool)
             {
-                if (card == c)
+                if (card.Equals(c))
                 {
                     _usedCards.Add(card);
                     _cardPool.Remove(card);

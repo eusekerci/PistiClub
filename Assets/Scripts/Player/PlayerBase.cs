@@ -8,7 +8,8 @@ namespace PistiClub
     public abstract class PlayerBase
     {
         protected List<Card> Hand;
-        public string PlayerID;
+        public int PlayerID;
+        public Transform HandRoot;
 
         protected PlayerBase()
         {
@@ -19,5 +20,9 @@ namespace PistiClub
         protected virtual void OnTurnStart() { }
 
         protected virtual void OnPlayCard() { }
+
+        public virtual void TakeCard(Card newCard) { }
+
+        public virtual void Update() { }
     }
 }

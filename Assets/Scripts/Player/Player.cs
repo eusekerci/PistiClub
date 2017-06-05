@@ -6,9 +6,11 @@ namespace PistiClub
 {
     public class Player : PlayerBase
     {
-        public Player()
+        public Player(int playerID, Transform root)
         {
-            
+            Hand = new List<Card>();
+            PlayerID = playerID;
+            HandRoot = root;
         }
 
         protected override void OnTurnStart()
@@ -23,5 +25,21 @@ namespace PistiClub
 
         }
 
+        public override void TakeCard(Card newCard)
+        {
+            base.TakeCard(newCard);
+            Hand.Add(newCard);
+        }
+
+        public void ReorderHand()
+        {
+
+        }
+
+        public override void Update()
+        {
+            base.Update();
+
+        }
     }
 }

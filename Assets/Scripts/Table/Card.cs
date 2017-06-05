@@ -46,6 +46,8 @@ namespace PistiClub
             }
         }
 
+        public Card() { }
+
         public Card(CardShape shape, CardValue value)
         {
             Shape = shape;
