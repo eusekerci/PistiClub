@@ -15,22 +15,20 @@ namespace PistiClub
 
         public override void Update()
         {
-            //Player can nothing when it's not his turn.
-            //Implemented for base gameplay
-            //TODO just apply this for card selection
-            if (!_myPlayer.IsMyTurn)
-                return;
-
             base.Update();
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, LayerMask.NameToLayer("Cards")))
+            if (Input.GetMouseButtonDown(0))
             {
-                var hitCard = hit.transform.GetComponent<CardView>().Data;
-                MessageBus.Publish(new PlayCardEvent()
+                RaycastHit hit;
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1 << LayerMask.NameToLayer("Cards")))
                 {
-                    Player = _myPlayer,
-                    Card = hitCard,
-                });
+                    Debug.Log("Card clicked by " + _myPlayer.PlayerID);
+                    var hitCard = hit.transform.GetComponent<CardView>().Data;
+                    MessageBus.Publish(new PlayCardCommand()
+                    {
+                        Player = _myPlayer,
+                        Card = hitCard,
+                    });
+                }
             }
         }
     }

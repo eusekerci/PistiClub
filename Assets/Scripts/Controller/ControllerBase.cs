@@ -4,10 +4,10 @@ using UnityEngine;
 
 namespace PistiClub
 {
-    public class PlayCardEvent : PcEvent
+    public class PlayCardCommand : PcEvent
     {
-        public PlayerBase Player { get; set; }
         public Card Card { get; set; }
+        public PlayerBase Player { get; set; }
     }
 
     public abstract class ControllerBase

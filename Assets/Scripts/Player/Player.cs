@@ -21,14 +21,17 @@ namespace PistiClub
 
         protected override void OnPlayCard(Card playedCard)
         {
+            Debug.Log(PlayerID + " played " + playedCard.ID);
             base.OnPlayCard(playedCard);
-            Hand.Remove(playedCard);
+            Hand.RemoveAll(c => playedCard.ID == c.ID);
             ReorderHand();
+            MessageBus.Publish(new PlayCardEvent() { Player = this, Card = playedCard });
         }
 
         protected override void OnTurnStart()
         {
             base.OnTurnStart();
+            Debug.Log("My Turn " + PlayerID);
         }
 
         public override void TakeCard(Card newCard)
@@ -41,13 +44,12 @@ namespace PistiClub
         {
             for (int i = 0; i < HandRoot.childCount; i++)
             {
-                GameObject oldCard = HandRoot.GetChild(0).gameObject;
-                ObjectPool.Instance.PushToPool(ref oldCard);
+                GameObject.Destroy(HandRoot.GetChild(i).gameObject);
             }
 
             for (int i = 0; i < Hand.Count; i++)
             {
-                GameObject newCard = ObjectPool.Instance.PopFromPool(PcResources.Load<GameObject>(PcResourceType.Card), false, true);
+                GameObject newCard = ObjectPool.Instance.PopFromPool(PcResources.CardPrefab, false, true);
                 newCard.GetComponent<CardView>().LoadData(Hand[i]);
                 newCard.transform.position = HandRoot.transform.position + new Vector3(i * 2f, 0f, 0f);
                 newCard.transform.SetParent(HandRoot);

@@ -12,6 +12,8 @@ namespace PistiClub
 
     public static class PcResources
     {
+        public static GameObject CardPrefab;
+
         private static readonly Dictionary<PcResourceType, string> ResourcePaths = new Dictionary<PcResourceType, string>();
         
         private static readonly Sprite[] CardSprites;
@@ -19,9 +21,13 @@ namespace PistiClub
         {
             ResourcePaths.Add(PcResourceType.Card, "Prefabs/Card");
 
+            //We Only use this prefab
+            //So lets everything goes faster while pooling
+            CardPrefab = Load<GameObject>(PcResourceType.Card);
+
             CardSprites = Resources.LoadAll<Sprite>("Sprites/CardSprites");
             GameObject go = Resources.Load<GameObject>("Prefabs/Card");
-            ObjectPool.Instance.AddToPool(go, 10, GameObject.Find("CardPool").transform);
+            ObjectPool.Instance.AddToPool(go, 100);
         }
 
         public static Sprite GetCardSprite(CardShape shape, CardValue value)

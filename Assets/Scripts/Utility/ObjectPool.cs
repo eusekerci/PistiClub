@@ -13,6 +13,8 @@ namespace PistiClub
 
     public sealed class ObjectPool
     {
+        public Transform CardPool;
+
         private Dictionary<GameObject, Queue<GameObject>> container = new Dictionary<GameObject, Queue<GameObject>>();
 
         private static ObjectPool instance = null;
@@ -35,7 +37,10 @@ namespace PistiClub
         {
             instance = null;
         }
-        private ObjectPool() { }
+        private ObjectPool()
+        {
+            CardPool = GameObject.Find("CardPool").transform;
+        }
 
         /// <summary>
         /// Adds to pool.
@@ -46,6 +51,8 @@ namespace PistiClub
         /// <param name="parent">The Transform container to store the items. If null, items are placed as parent</param>
         public bool AddToPool(GameObject prefab, int count, Transform parent = null)
         {
+            if (parent == null)
+                parent = CardPool;
             if (prefab == null || count <= 0) { return false; }
             for (int i = 0; i < count; i++)
             {
@@ -65,6 +72,8 @@ namespace PistiClub
         /// <param name="container">The Transform container to store the popped item.</param>
         public GameObject PopFromPool(GameObject prefab, bool forceInstantiate = false, bool instantiateIfNone = false, Transform container = null)
         {
+            if (container == null)
+                container = CardPool;
             GameObject obj = null;
             if (forceInstantiate == true)
             {
@@ -103,8 +112,8 @@ namespace PistiClub
             GameObject obj = (GameObject)Object.Instantiate(prefab);
             IPoolObject poolObject = obj.GetComponent<IPoolObject>();
             obj.name = prefab.name;
-            //poolObject.Prefab = prefab;
             obj.transform.parent = container;
+            obj.transform.localPosition = Vector3.zero;
             return obj;
         }
 
@@ -116,6 +125,8 @@ namespace PistiClub
         /// <param name="newParent">The Transform container to store the item.</param>
         public void PushToPool(ref GameObject obj, bool retainObject = true, Transform newParent = null)
         {
+            if (newParent == null)
+                newParent = CardPool;
             if (obj == null) { return; }
             if (retainObject == false)
             {
@@ -126,6 +137,11 @@ namespace PistiClub
             if (newParent != null)
             {
                 obj.transform.parent = newParent;
+                obj.transform.localPosition = Vector3.zero;
+            }
+            else
+            {
+                obj.transform.position = new Vector3(900, 900, 0);
             }
             IPoolObject poolObject = obj.GetComponent<IPoolObject>();
             if (poolObject != null)

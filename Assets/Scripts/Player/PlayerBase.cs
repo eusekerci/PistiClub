@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace PistiClub
 {
+    public class PlayCardEvent : PcEvent
+    {
+        public PlayerBase Player { get; set; }
+        public Card Card { get; set; }
+    }
+
     public abstract class PlayerBase
     {
         protected List<Card> Hand;
@@ -29,7 +35,7 @@ namespace PistiClub
                     IsMyTurn = false;
                 }
             });
-            MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
+            MessageBus.OnEvent<PlayCardCommand>().Subscribe(evnt => {
                 if (evnt.Player.PlayerID == PlayerID)
                 {
                     OnPlayCard(evnt.Card);

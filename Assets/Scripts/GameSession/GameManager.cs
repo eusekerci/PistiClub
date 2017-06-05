@@ -50,7 +50,7 @@ namespace PistiClub
             _controllers.Add(new PlayerController(_players[0]));
 
             _players.Add(new Player(1, _p2Root));
-            _controllers.Add(new PlayerController(_players[1]));
+            _controllers.Add(new AIController(_players[1]));
 
             MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
                 if (evnt.Player.PlayerID == _yourTurn.PlayerID)
@@ -126,7 +126,7 @@ namespace PistiClub
 
         protected void OnCardPlayed(Card newCard)
         {
-            
+            Debug.Log("GameManager: " + _yourTurn.PlayerID + " played " + newCard.ID);
         }
     }
 }
