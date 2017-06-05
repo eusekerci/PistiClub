@@ -45,6 +45,7 @@ namespace PistiClub
             _cardsOnMid = new List<Card>();
 
             _playerCount = 2;
+            _turnCounter = 0;
 
             _players.Add(new Player(0, _p1Root));
             _controllers.Add(new PlayerController(_players[0]));
@@ -55,6 +56,7 @@ namespace PistiClub
             MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
                 if (evnt.Player.PlayerID == _yourTurn.PlayerID)
                 {
+                    _players[_turnCounter % _playerCount] = evnt.Player;
                     OnCardPlayed(evnt.Card);
                 }
             });
@@ -127,6 +129,9 @@ namespace PistiClub
         protected void OnCardPlayed(Card newCard)
         {
             Debug.Log("GameManager: " + _yourTurn.PlayerID + " played " + newCard.ID);
+            _turnCounter++;
+            _yourTurn = _players[_turnCounter % _playerCount];
+            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn });
         }
     }
 }
