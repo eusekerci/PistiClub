@@ -12,6 +12,7 @@ namespace PistiClub
             PlayerID = playerID;
             HandRoot = root;
             _isAI = isAI;
+            _score = 0;
         }
 
         protected override void OnRoundStart()
@@ -27,6 +28,7 @@ namespace PistiClub
             Hand.RemoveAll(c => playedCard.ID == c.ID);
             ReorderHand();
             MessageBus.Publish(new PlayCardEvent() { Player = this, Card = playedCard });
+            IsMyTurn = false;
         }
 
         protected override void OnTurnStart()
@@ -60,7 +62,6 @@ namespace PistiClub
         public override void Update()
         {
             base.Update();
-
         }
     }
 }

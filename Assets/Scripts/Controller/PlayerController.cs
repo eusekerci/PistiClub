@@ -12,17 +12,10 @@ namespace PistiClub
             _isPlayable = false;
             _myPlayer = player;
 
-            MessageBus.OnEvent<TurnStartEvent>().Subscribe(evnt =>
+            MessageBus.OnEvent<TurnStartEvent>().Where(evnt => evnt.Player.PlayerID == _myPlayer.PlayerID).Subscribe(evnt =>
             {
-                if (evnt.Player.PlayerID == _myPlayer.PlayerID)
-                {
-                    _myPlayer = evnt.Player;
-                    _isPlayable = true;
-                }
-                else
-                {
-                    _isPlayable = false;
-                }
+                _myPlayer = evnt.Player;
+                _isPlayable = true;
             });
         }
 
@@ -45,6 +38,7 @@ namespace PistiClub
                         Player = _myPlayer,
                         Card = hitCard,
                     });
+                    _isPlayable = false;
                 }
             }
         }

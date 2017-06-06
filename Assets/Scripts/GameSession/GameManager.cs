@@ -13,6 +13,12 @@ namespace PistiClub
         public Card TopCard { get; set; }
     }
 
+    public class PlayerGotScoreEvent : PcEvent
+    {
+        public PlayerBase Player { get; set; }
+        public int Score { get; set; }
+    }
+
     public class GameEndEvent : PcEvent { }
 
     public class GameManager : MonoBehaviour
@@ -40,6 +46,7 @@ namespace PistiClub
         private int _maxTurn;
         private PlayerBase _yourTurn;
         private bool _isGameRunning = true;
+        private int _roundScore;
 
         void Start()
         {
@@ -50,6 +57,7 @@ namespace PistiClub
 
             _playerCount = 2;
             _turnCounter = 0;
+            _roundScore = 0;
 
             _players.Add(new Player(0, _p1Root));
             _controllers.Add(new PlayerController(_players[0]));
@@ -57,12 +65,10 @@ namespace PistiClub
             _players.Add(new Player(1, _p2Root, true));
             _controllers.Add(new AIController(_players[1]));
 
-            MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
-                if (evnt.Player.PlayerID == _yourTurn.PlayerID)
-                {
+            MessageBus.OnEvent<PlayCardEvent>().Where(evnt => evnt.Player.PlayerID == _yourTurn.PlayerID).Subscribe(evnt => 
+            {
                     _players[_turnCounter % _playerCount] = evnt.Player;
                     OnCardPlayed(evnt.Card);
-                }
             });
 
             MessageBus.OnEvent<GameEndEvent>().Subscribe(evnt =>
@@ -131,23 +137,23 @@ namespace PistiClub
             }
 
             MessageBus.Publish(new RoundStartEvent());
-            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid[_cardsOnMid.Count - 1] });
+            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid.Count > 0 ? _cardsOnMid[_cardsOnMid.Count - 1] : null });
         }
 
         private void OnCardPlayed(Card newCard)
         {
             Debug.Log("GameManager: " + _yourTurn.PlayerID + " played " + newCard.ID);
-            CheckForScore(newCard);
+            PutCardOnMid(newCard);
+            CheckForScore();
             _turnCounter++;
             _yourTurn = _players[_turnCounter % _playerCount];
-            PutCardOnMid(newCard);
             if (_turnCounter % (_playerCount * 4) == 0)
             {
                 OnAllHandsAreEmpty();
             }
             else
             {
-                MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid[_cardsOnMid.Count - 1] });
+                MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid.Count > 0 ? _cardsOnMid[_cardsOnMid.Count - 1] : null });
             }
         }
 
@@ -165,7 +171,7 @@ namespace PistiClub
             }
             else
             {
-                GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
+                GameObject newCard = ObjectPool.Instance.PopFromPool(PcResources.CardPrefab, false, true);
                 newCard.GetComponent<CardView>().LoadData(card);
                 newCard.transform.SetParent(_midRoot);
                 newCard.transform.localPosition = Vector3.zero;
@@ -173,12 +179,63 @@ namespace PistiClub
         }
 
         #region Score Calculations
-        private void CheckForScore(Card newCard)
+        private void CheckForScore()
         {
-            if(newCard.Value == _cardsOnMid[_cardsOnMid.Count-1].Value || newCard.Value == CardValue.Jack)
+            var newCard = _cardsOnMid[_cardsOnMid.Count - 1];
+
+            if (newCard.Value == CardValue.Two && newCard.Shape == CardShape.Clubs)
             {
-                //TODO Score Calculations
-                _cardsOnMid.Clear();
+                _roundScore += 2;
+            }
+            else if (newCard.Value == CardValue.Ten && newCard.Shape == CardShape.Diamonds)
+            {
+                _roundScore += 3;
+            }
+            else if (newCard.Value == CardValue.Ace || newCard.Value == CardValue.Jack)
+            {
+                _roundScore += 1;
+            }
+
+            if (_cardsOnMid.Count > 1)
+            {
+                var oldCard = _cardsOnMid[_cardsOnMid.Count - 2];
+
+                if (newCard.Value == oldCard.Value || newCard.Value == CardValue.Jack)
+                {
+                    Debug.Log("!!SCORE!!");
+
+                    if (_cardsOnMid.Count == 2)
+                    {
+                        Debug.Log("!!PISTI!!");
+                        if (newCard.Value == CardValue.Jack)
+                        {
+                            if (oldCard.Value == CardValue.Jack)
+                            {
+                                MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = 20 });
+                            }
+                            else
+                            {
+                                MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = _roundScore });
+                            }
+                        }
+                        else
+                            MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = 10 });
+                    }
+                    else
+                    {
+                        MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = _roundScore });
+                    }
+
+                    _roundScore = 0;
+                    _cardsOnMid.Clear();
+
+                    foreach (Transform child in _midRoot)
+                    {
+                        GameObject.Destroy(child.gameObject);
+                    }
+
+                    Debug.Log("All childs are destroyed: " + _midRoot.childCount);
+                }
             }
 
         }

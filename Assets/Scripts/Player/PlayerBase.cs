@@ -17,6 +17,7 @@ namespace PistiClub
         public int PlayerID;
         public Transform HandRoot;
         public bool IsMyTurn;
+        protected int _score;
         protected bool _isAI;
 
         protected PlayerBase()
@@ -24,23 +25,17 @@ namespace PistiClub
             IsMyTurn = false;
 
             MessageBus.OnEvent<RoundStartEvent>().Subscribe(evnt => OnRoundStart());
-            MessageBus.OnEvent<TurnStartEvent>().Subscribe(evnt =>
+            MessageBus.OnEvent<TurnStartEvent>().Where(evnt=> evnt.Player.PlayerID == PlayerID).Subscribe(evnt =>
             {
-                if (evnt.Player.PlayerID == PlayerID)
-                {
-                    IsMyTurn = true;
-                    OnTurnStart();
-                }
-                else
-                {
-                    IsMyTurn = false;
-                }
+                IsMyTurn = true;
+                OnTurnStart();
             });
-            MessageBus.OnEvent<PlayCardCommand>().Subscribe(evnt => {
-                if (evnt.Player.PlayerID == PlayerID)
-                {
-                    OnPlayCard(evnt.Card);
-                }
+            MessageBus.OnEvent<PlayCardCommand>().Where(evnt => evnt.Player.PlayerID == PlayerID).Subscribe(evnt => {
+                OnPlayCard(evnt.Card);
+            });
+            MessageBus.OnEvent<PlayerGotScoreEvent>().Where(evnt => evnt.Player.PlayerID == PlayerID).Subscribe(evnt =>
+            {
+                _score = evnt.Score;
             });
         }
 
