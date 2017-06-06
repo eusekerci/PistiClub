@@ -6,11 +6,12 @@ namespace PistiClub
 {
     public class Player : PlayerBase
     {
-        public Player(int playerID, Transform root)
+        public Player(int playerID, Transform root, bool isAI = false)
         {
             Hand = new List<Card>();
             PlayerID = playerID;
             HandRoot = root;
+            _isAI = isAI;
         }
 
         protected override void OnRoundStart()
@@ -50,7 +51,7 @@ namespace PistiClub
             for (int i = 0; i < Hand.Count; i++)
             {
                 GameObject newCard = ObjectPool.Instance.PopFromPool(PcResources.CardPrefab, false, true);
-                newCard.GetComponent<CardView>().LoadData(Hand[i]);
+                newCard.GetComponent<CardView>().LoadData(Hand[i], _isAI);
                 newCard.transform.position = HandRoot.transform.position + new Vector3(i * 2f, 0f, 0f);
                 newCard.transform.SetParent(HandRoot);
             }

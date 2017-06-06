@@ -13,6 +13,8 @@ namespace PistiClub
         public Card TopCard { get; set; }
     }
 
+    public class GameEndEvent : PcEvent { }
+
     public class GameManager : MonoBehaviour
     {
         public GameObject CardPrefab;
@@ -37,6 +39,7 @@ namespace PistiClub
         private int _turnCounter;
         private int _maxTurn;
         private PlayerBase _yourTurn;
+        private bool _isGameRunning = true;
 
         void Start()
         {
@@ -51,7 +54,7 @@ namespace PistiClub
             _players.Add(new Player(0, _p1Root));
             _controllers.Add(new PlayerController(_players[0]));
 
-            _players.Add(new Player(1, _p2Root));
+            _players.Add(new Player(1, _p2Root, true));
             _controllers.Add(new AIController(_players[1]));
 
             MessageBus.OnEvent<PlayCardEvent>().Subscribe(evnt => {
@@ -62,11 +65,20 @@ namespace PistiClub
                 }
             });
 
+            MessageBus.OnEvent<GameEndEvent>().Subscribe(evnt =>
+            {
+                _isGameRunning = false;
+            });
+
             OnGameStart();
         }
 
         void Update()
         {
+            if(!_isGameRunning)
+            {
+                return;
+            }
             for (int i = 0; i < _controllers.Count; i++)
             {
                 _controllers[i].Update();
@@ -82,7 +94,7 @@ namespace PistiClub
         {
             for(int i=0; i<4; i++)
             {
-                AddNewCardOnMid(_deck.Draw());
+                PutCardOnMid(_deck.Draw());
             }
             if (_deck.RemainingCount() > 0 && _deckRoot.childCount < 1)
             {
@@ -108,6 +120,12 @@ namespace PistiClub
             {
                 for (int j = 0; j < _playerCount; j++)
                 {
+                    Card newCard = _deck.Draw();
+                    if(newCard == null)
+                    {
+                        MessageBus.Publish(new GameEndEvent());
+                        return;
+                    }
                     _players[j].TakeCard(_deck.Draw());
                 }
             }
@@ -116,12 +134,13 @@ namespace PistiClub
             MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid[_cardsOnMid.Count - 1] });
         }
 
-        protected void OnCardPlayed(Card newCard)
+        private void OnCardPlayed(Card newCard)
         {
             Debug.Log("GameManager: " + _yourTurn.PlayerID + " played " + newCard.ID);
+            CheckForScore(newCard);
             _turnCounter++;
             _yourTurn = _players[_turnCounter % _playerCount];
-            AddNewCardOnMid(newCard);
+            PutCardOnMid(newCard);
             if (_turnCounter % (_playerCount * 4) == 0)
             {
                 OnAllHandsAreEmpty();
@@ -132,8 +151,13 @@ namespace PistiClub
             }
         }
 
-        private void AddNewCardOnMid(Card card)
+        private void PutCardOnMid(Card card)
         {
+            if(card == null)
+            {
+                MessageBus.Publish(new GameEndEvent());
+                return;
+            }
             _cardsOnMid.Add(card);
             if (_midRoot.childCount > 0)
             {
@@ -147,5 +171,17 @@ namespace PistiClub
                 newCard.transform.localPosition = Vector3.zero;
             }
         }
+
+        #region Score Calculations
+        private void CheckForScore(Card newCard)
+        {
+            if(newCard.Value == _cardsOnMid[_cardsOnMid.Count-1].Value || newCard.Value == CardValue.Jack)
+            {
+                //TODO Score Calculations
+                _cardsOnMid.Clear();
+            }
+
+        }
+        #endregion
     }
 }

@@ -17,6 +17,7 @@ namespace PistiClub
         public int PlayerID;
         public Transform HandRoot;
         public bool IsMyTurn;
+        protected bool _isAI;
 
         protected PlayerBase()
         {

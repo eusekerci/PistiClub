@@ -37,6 +37,11 @@ namespace PistiClub
 
         public Card Draw()
         {
+            if (RemainingCount() == 0)
+            {
+                return null;
+            }
+
             int r = Random.Range(0, RemainingCount());
 
             return Draw(_cardPool[r].Shape, _cardPool[r].Value);
@@ -57,7 +62,6 @@ namespace PistiClub
                 }
             }
 
-            Debug.Log("Error! The demanding card has already drawed!");
             return null;
         }
 
