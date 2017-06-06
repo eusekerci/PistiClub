@@ -10,6 +10,7 @@ namespace PistiClub
     public class TurnStartEvent : PcEvent
     {
         public PlayerBase Player { get; set; }
+        public Card TopCard { get; set; }
     }
 
     public class GameManager : MonoBehaviour
@@ -81,18 +82,7 @@ namespace PistiClub
         {
             for(int i=0; i<4; i++)
             {
-                _cardsOnMid.Add(_deck.Draw());
-                if (_midRoot.childCount > 0)
-                {
-                    _midRoot.GetChild(0).GetComponent<CardView>().LoadData(_cardsOnMid[i]);
-                }
-                else
-                {
-                    GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
-                    newCard.GetComponent<CardView>().LoadData(_cardsOnMid[i]);
-                    newCard.transform.SetParent(_midRoot);
-                    newCard.transform.localPosition = Vector3.zero;
-                }
+                AddNewCardOnMid(_deck.Draw());
             }
             if (_deck.RemainingCount() > 0 && _deckRoot.childCount < 1)
             {
@@ -123,7 +113,7 @@ namespace PistiClub
             }
 
             MessageBus.Publish(new RoundStartEvent());
-            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn });
+            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid[_cardsOnMid.Count - 1] });
         }
 
         protected void OnCardPlayed(Card newCard)
@@ -131,7 +121,31 @@ namespace PistiClub
             Debug.Log("GameManager: " + _yourTurn.PlayerID + " played " + newCard.ID);
             _turnCounter++;
             _yourTurn = _players[_turnCounter % _playerCount];
-            MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn });
+            AddNewCardOnMid(newCard);
+            if (_turnCounter % (_playerCount * 4) == 0)
+            {
+                OnAllHandsAreEmpty();
+            }
+            else
+            {
+                MessageBus.Publish(new TurnStartEvent() { Player = _yourTurn, TopCard = _cardsOnMid[_cardsOnMid.Count - 1] });
+            }
+        }
+
+        private void AddNewCardOnMid(Card card)
+        {
+            _cardsOnMid.Add(card);
+            if (_midRoot.childCount > 0)
+            {
+                _midRoot.GetChild(0).GetComponent<CardView>().LoadData(card);
+            }
+            else
+            {
+                GameObject newCard = ObjectPool.Instance.PopFromPool(CardPrefab, false, true);
+                newCard.GetComponent<CardView>().LoadData(card);
+                newCard.transform.SetParent(_midRoot);
+                newCard.transform.localPosition = Vector3.zero;
+            }
         }
     }
 }

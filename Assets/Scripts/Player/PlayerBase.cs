@@ -13,7 +13,7 @@ namespace PistiClub
 
     public abstract class PlayerBase
     {
-        protected List<Card> Hand;
+        public List<Card> Hand;
         public int PlayerID;
         public Transform HandRoot;
         public bool IsMyTurn;

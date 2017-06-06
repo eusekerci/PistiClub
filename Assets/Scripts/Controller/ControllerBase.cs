@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 namespace PistiClub
 {
@@ -12,7 +13,12 @@ namespace PistiClub
 
     public abstract class ControllerBase
     {
-        protected ControllerBase() { }
+        protected PlayerBase _myPlayer;
+        protected bool _isPlayable;
+
+        protected ControllerBase()
+        {
+        }
 
         public virtual void Update() { }
     }

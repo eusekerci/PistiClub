@@ -7,9 +7,6 @@ namespace PistiClub
 {
     public class PlayerController : ControllerBase
     {
-        private PlayerBase _myPlayer;
-        private bool _isPlayable;
-
         public PlayerController(PlayerBase player)
         {
             _isPlayable = false;
