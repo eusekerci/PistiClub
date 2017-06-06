@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UniRx;
+using System;
 
 namespace PistiClub
 {
@@ -30,38 +31,54 @@ namespace PistiClub
             base.Update();
             if (_lastPlayedCard == null)
             {
-                MessageBus.Publish(new PlayCardCommand()
-                {
-                    Player = _myPlayer,
-                    Card = _myPlayer.Hand[Random.Range(0, _myPlayer.Hand.Count)],
-                });
                 _isPlayable = false;
+                AIPlayRandomCommand();
             }
             else
             {
-                for (int i = 0; i < _myPlayer.Hand.Count; i++)
+                for (int i = 0; i < _myPlayer.Hand.Count && _isPlayable; i++)
                 {
                     if (_myPlayer.Hand[i].Value == _lastPlayedCard.Value)
                     {
-                        MessageBus.Publish(new PlayCardCommand()
-                        {
-                            Player = _myPlayer,
-                            Card = _myPlayer.Hand[i],
-                        });
                         _isPlayable = false;
+                        AIPlayScoreCommand(i);
                         break;
                     }
                 }
                 if (_isPlayable && _myPlayer.Hand.Count > 0)
                 {
-                    MessageBus.Publish(new PlayCardCommand()
-                    {
-                        Player = _myPlayer,
-                        Card = _myPlayer.Hand[Random.Range(0, _myPlayer.Hand.Count)],
-                    });
                     _isPlayable = false;
+                    AIPlayRandomCommand();
                 }
             }
+        }
+
+        private void AIPlayRandomCommand()
+        {
+            IDisposable d = null;
+            d = Observable.Timer(TimeSpan.FromSeconds(1f)).Subscribe(x =>
+            {
+                MessageBus.Publish(new PlayCardCommand()
+                {
+                    Player = _myPlayer,
+                    Card = _myPlayer.Hand[UnityEngine.Random.Range(0, _myPlayer.Hand.Count)],
+                });
+                d.Dispose();
+            });
+        }
+
+        private void AIPlayScoreCommand(int i)
+        {
+            IDisposable d = null;
+            d = Observable.Timer(TimeSpan.FromSeconds(1f)).Subscribe(x =>
+            {
+                MessageBus.Publish(new PlayCardCommand()
+                {
+                    Player = _myPlayer,
+                    Card = _myPlayer.Hand[i],
+                });
+                d.Dispose();
+            });
         }
     }
 
