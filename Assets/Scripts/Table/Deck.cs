@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace PistiClub
 {
-    public class DrawCardEvent : PcEvent { }
+    public class DrawCardEvent : PcEvent
+    {
+        public int Remaining;
+    }
 
     public class Deck
     {
@@ -57,7 +60,7 @@ namespace PistiClub
                 {
                     _usedCards.Add(card);
                     _cardPool.Remove(card);
-                    MessageBus.Publish(new DrawCardEvent());
+                    MessageBus.Publish(new DrawCardEvent() { Remaining = _cardPool.Count });
                     return c;
                 }
             }
