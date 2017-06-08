@@ -132,7 +132,7 @@ namespace PistiClub
                         MessageBus.Publish(new GameEndEvent());
                         return;
                     }
-                    _players[j].TakeCard(_deck.Draw());
+                    _players[j].TakeCard(newCard);
                 }
             }
 
@@ -211,19 +211,27 @@ namespace PistiClub
                         {
                             if (oldCard.Value == CardValue.Jack)
                             {
+                                Debug.Log("!!PISTI!!");
                                 MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = 20 });
+                                Debug.Log("Player " + _yourTurn.PlayerID + " got 20");
                             }
                             else
                             {
                                 MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = _roundScore });
+                                Debug.Log("Player " + _yourTurn.PlayerID + " got " + _roundScore);
                             }
                         }
                         else
+                        {
+                            Debug.Log("!!PISTI!!");
                             MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = 10 });
+                            Debug.Log("Player " + _yourTurn.PlayerID + " got 10");
+                        }
                     }
                     else
                     {
                         MessageBus.Publish(new PlayerGotScoreEvent() { Player = _yourTurn, Score = _roundScore });
+                        Debug.Log("Player " + _yourTurn.PlayerID + " got " + _roundScore);
                     }
 
                     _roundScore = 0;
